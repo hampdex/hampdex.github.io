@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mário Frito Graficos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&family=Press+Start+2P&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+
+    body {
+      background-color: #ebebeb;
+
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      font-family: "Poppins", sans-serif;
+    }
+
+    .header {
+      display: grid;
+      box-sizing: border-box;
+      border: thick double #414141;
+      max-width: 300px;
+      /* Ajuste conforme necessário */
+      padding: 10px;
+      margin: auto;
+      /* Centraliza horizontalmente */
+      border-radius: 20px;
+    }
+
+    .gap {
+      padding: 10px;
+    }
+
+    .div {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      margin: 0 auto;
+      max-width: 1200px;
+    }
+
+    .logo {
+      align-self: end;
+      padding-bottom: 200px;
+    }
+
+    .lowbit {
+      font-family: "Press Start 2P";
+      font-size: 1rem;
+      padding-bottom: 20px;
+    }
+
+    .heatmap-font {
+      font-family: "Press Start 2P";
+      font-size: 1rem;
+      display: flex;
+      justify-content: center;
+      padding-bottom: 10px;
+    }
+
+    .heatmap {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    .tooltip {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px;
+      border-radius: 5px;
+      font-size: 14px;
+      visibility: hidden;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- TradingView Widget BEGIN -->
+  <div class="tradingview-widget-container">
+    <div class="tradingview-widget-container__widget"></div>
+    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+      {
+        "symbols": [
+          {
+            "description": "BTC/USDT",
+            "proName": "BINANCE:BTCUSDT"
+          },
+          {
+            "description": "SOL/USDT",
+            "proName": "BINANCE:SOLUSDT"
+          },
+          {
+            "description": "XRP/USDT",
+            "proName": "BINANCE:XRPUSDT"
+          },
+          {
+            "description": "ETH/USDT",
+            "proName": "BINANCE:ETHUSDT"
+          },
+          {
+            "description": "LTC/USDT",
+            "proName": "BINANCE:LTCUSDT"
+          },
+          {
+            "description": "BNB/USDT",
+            "proName": "BINANCE:BNBUSDT"
+          },
+          {
+            "description": "DOGE/USDT",
+            "proName": "BINANCE:DOGEUSDT"
+          },
+          {
+            "description": "SUI/USDT",
+            "proName": "BINANCE:SUIUSDT"
+          },
+          {
+            "description": "ADA/USDT",
+            "proName": "BINANCE:ADAUSDT"
+          },
+          {
+            "description": "USDT",
+            "proName": "CRYPTOCAP:USDT"
+          }
+        ],
+          "showSymbolLogo": true,
+            "isTransparent": false,
+              "displayMode": "adaptive",
+                "colorTheme": "dark",
+                  "locale": "br"
+      }
+    </script>
+  </div>
+  <!-- TradingView Widget END -->
+  <div class="gap">
+    <div class="header">
+      <h1 class="Logo container">Mário Frit🍳</h1>
+      <h2 class="lowbit container">0xh4mpd3x.eth</h1>
+    </div>
+  </div>
+  <div class="div">
+    <div>
+      <h1 class="heatmap-font">Gráficos Frit🍳s</h1>
+      <script type="text/javascript" src="https://s3.tradingview.com/tv.js" class="graph"></script>
+      <script type="text/javascript">
+        new TradingView.widget({
+          "container_id": "tradingview1",
+          "width": 500,
+          "height": 650,
+          "symbol": "BINANCE:BTCUSDT",  // Alterado para BTC/USDT
+          "interval": "D",
+          "theme": "light",
+          "style": "1",
+          "locale": "br",
+          "toolbar_bg": "#f1f3f6",
+          "enable_publishing": false,
+          "allow_symbol_change": true,
+          "autosize": false
+        });
+      </script>
+
+    </div>
+    <div>
+      <h1 class="heatmap-font">Heatmap de Criptomoedas</h1>
+      <div id="heatmap" class="heatmap"></div>
+      <div id="tooltip" class="tooltip"></div>
+
+      <script>
+        async function fetchCryptoData() {
+          const response = await fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=20&page=1&sparkline=false");
+          const data = await response.json();
+          return data;
+        }
+
+        function getColor(percentage) {
+          return percentage > 5 ? "#1f7a1f" : // Verde forte (subindo muito)
+            percentage > 0 ? "#4caf50" : // Verde claro (subindo)
+              percentage < -5 ? "#b71c1c" : // Vermelho forte (caindo muito)
+                percentage < 0 ? "#e57373" : // Vermelho claro (caindo)
+                  "#fbc02d";  // Amarelo (neutro)
+        }
+
+        async function renderHeatmap() {
+          const cryptos = await fetchCryptoData();
+          const container = d3.select("#heatmap");
+
+          const tooltip = d3.select("#tooltip");
+
+          const size = 100; // Tamanho do bloco
+
+          const boxes = container.selectAll("div")
+            .data(cryptos)
+            .enter()
+            .append("div")
+            .style("width", `${size}px`)
+            .style("height", `${size}px`)
+            .style("margin", "5px")
+            .style("display", "flex")
+            .style("align-items", "center")
+            .style("justify-content", "center")
+            .style("border-radius", "8px")
+            .style("color", "white")
+            .style("font-weight", "bold")
+            .style("font-size", "14px")
+            .style("background-color", d => getColor(d.price_change_percentage_24h))
+            .style("transition", "transform 0.2s ease")
+            .text(d => d.symbol.toUpperCase())
+
+            // Hover Effect
+            .on("mouseover", function (event, d) {
+              tooltip.style("visibility", "visible")
+                .html(`<b>${d.name}</b><br>Preço: $${d.current_price}<br>Variação: ${d.price_change_percentage_24h.toFixed(2)}%`)
+                .style("left", (event.pageX + 10) + "px")
+                .style("top", (event.pageY - 30) + "px");
+
+              d3.select(this).style("transform", "scale(1.1)");
+            })
+            .on("mousemove", function (event) {
+              tooltip.style("left", (event.pageX + 10) + "px")
+                .style("top", (event.pageY - 30) + "px");
+            })
+            .on("mouseout", function () {
+              tooltip.style("visibility", "hidden");
+              d3.select(this).style("transform", "scale(1)");
+            });
+        }
+
+        renderHeatmap();
+      </script>
+
+
+    </div>
+  </div>
+
+</body>
+
+</html>
